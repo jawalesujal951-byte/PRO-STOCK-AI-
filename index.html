@@ -1,0 +1,1621 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PRO STOCK AI - Trade Station</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+    <style id="base-styles">
+      :root {
+        --color-accent: #2962ff;
+        --color-accent-hover: #1d4ed8;
+        --color-accent-glow: rgba(41, 98, 255, 0.4);
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-attachment: fixed;
+        min-height: 100vh;
+        transition: background 0.4s ease, color 0.4s ease;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .dark .glass-card {
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      /* Custom Slider styling */
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        height: 6px;
+      }
+      .dark input[type="range"] {
+        background: rgba(15, 23, 42, 0.6);
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--color-accent);
+        cursor: pointer;
+        box-shadow: 0 0 10px var(--color-accent-glow);
+        transition: transform 0.1s ease;
+      }
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+      }
+      /* Hide number input spinners */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+      .active-tab-nav {
+        background: var(--color-accent);
+        color: white !important;
+        box-shadow: 0 0 15px var(--color-accent-glow);
+      }
+    </style>
+    <!-- Dynamic theme styles target -->
+    <style id="dynamic-theme-styles"></style>
+  </head>
+  <body class="text-slate-900 dark:text-slate-100 overflow-x-hidden pb-24 md:pb-6 font-sans">
+    
+    <!-- Toast Message element -->
+    <div id="toast-wrapper" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full p-4"></div>
+
+    <!-- 1. LOGIN SCREEN -->
+    <div id="login-container" class="min-h-screen flex flex-col items-center justify-center p-4 z-10 relative">
+      <div class="w-full max-w-md glass-card p-8 rounded-3xl shadow-2xl flex flex-col items-center">
+        <!-- Logo -->
+        <div class="mb-4 p-4 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 flex items-center justify-center">
+          <svg class="w-12 h-12 text-[var(--color-accent)] filter drop-shadow-[0_0_8px_var(--color-accent-glow)]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M6 3v18M18 3v18M6 8h4v6H6zm10-3h4v8h-4z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-display font-bold tracking-tight text-center bg-gradient-to-r from-emerald-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">PRO STOCK AI</h1>
+        <p class="text-[10px] text-slate-400 dark:text-slate-400 mt-1 uppercase tracking-widest font-mono" id="login-subtitle">Trade Calculation Suite</p>
+        
+        <div class="w-full mt-8 space-y-6">
+          <div class="text-center">
+            <h2 id="login-welcome-title" class="text-lg font-medium text-slate-800 dark:text-slate-200">Welcome to Pro Stock AI</h2>
+            <p id="login-welcome-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Configure premium setups, simulate profits/losses, and lock your risk matrix.</p>
+          </div>
+
+          <form id="login-form-element" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+            <div>
+              <label id="login-name-label" class="block text-xs font-mono text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Enter User Name / नाव प्रविष्ट करा</label>
+              <input type="text" id="username-input" required class="w-full px-4 py-3.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[var(--color-accent)] font-medium text-sm transition-all" placeholder="E.g. Sujal Jawale">
+            </div>
+            
+            <button type="submit" id="login-submit-btn" class="w-full py-4 rounded-xl text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-90" style="background: var(--color-accent); box-shadow: 0 4px 15px var(--color-accent-glow);">
+              <span>Access Station / स्टेशन दाखवा</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TERMINAL APP CONTAINER -->
+    <div id="app-container" class="hidden min-h-screen relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-24 md:pb-6">
+      
+      <!-- HEADER -->
+      <header class="glass-card rounded-2xl p-4 mb-6 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-xl bg-slate-200/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 flex items-center justify-center">
+            <svg class="w-7 h-7 text-[var(--color-accent)]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M6 3v18M18 3v18M6 8h4v6H6zm10-3h4v8h-4z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-display font-bold bg-gradient-to-r from-emerald-400 to-[var(--color-accent)] bg-clip-text text-transparent">PRO STOCK AI</h2>
+            <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono tracking-wider -mt-1 uppercase" id="header-subtitle">Professional Trade Suite</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 text-right">
+          <div class="hidden sm:flex flex-col items-end">
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium" id="header-user-welcome">Trader: Guest</span>
+            <span class="text-[9px] font-mono text-emerald-500 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              LIVE STATION
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <!-- PANELS & SCREENS -->
+      <main class="w-full">
+        
+        <!-- 2. TERMINAL CALCULATOR SCREEN -->
+        <section id="terminal-screen" class="space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Parameters input card -->
+            <div class="lg:col-span-7 glass-card rounded-3xl p-6 shadow-xl space-y-5">
+              <div class="flex justify-between items-center border-b border-slate-300/30 dark:border-white/10 pb-3">
+                <h3 class="text-lg font-bold font-display text-[var(--color-accent)] flex items-center gap-2">
+                  <i data-lucide="calculator" class="w-5 h-5"></i>
+                  <span id="title-terminal">Terminal Calculator</span>
+                </h3>
+                <div class="flex bg-slate-200/60 dark:bg-slate-950 p-1 rounded-xl w-44 border border-slate-300/30 dark:border-white/5">
+                  <button onclick="setTerminalSide('BUY')" id="side-buy-btn" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-white bg-emerald-500 shadow-sm" id="btn-buy">BUY</button>
+                  <button onclick="setTerminalSide('SELL')" id="side-sell-btn" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" id="btn-sell">SELL</button>
+                </div>
+              </div>
+
+              <!-- Inputs Fields Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- Capital -->
+                <div class="space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide flex justify-between">
+                    <span id="lbl-capital">Capital / Margin (₹)</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3 text-sm font-medium text-slate-400">₹</span>
+                    <input type="number" id="inp-capital" value="50000" oninput="runTerminalCalculation()" class="w-full pl-7 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                  </div>
+                  <!-- Quick selector chips -->
+                  <div class="flex flex-wrap gap-1 pt-1">
+                    <button onclick="fillCapitalValue(10000)" class="text-[10px] font-semibold bg-slate-200 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-800 px-2.5 py-1 rounded-lg">10K</button>
+                    <button onclick="fillCapitalValue(25000)" class="text-[10px] font-semibold bg-slate-200 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-800 px-2.5 py-1 rounded-lg">25K</button>
+                    <button onclick="fillCapitalValue(50000)" class="text-[10px] font-semibold bg-slate-200 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-800 px-2.5 py-1 rounded-lg">50K</button>
+                    <button onclick="fillCapitalValue(100000)" class="text-[10px] font-semibold bg-slate-200 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-800 px-2.5 py-1 rounded-lg">1L</button>
+                    <button onclick="fillCapitalValue(500000)" class="text-[10px] font-semibold bg-slate-200 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-800 px-2.5 py-1 rounded-lg">5L</button>
+                  </div>
+                </div>
+
+                <!-- Entry Price -->
+                <div class="space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide flex justify-between">
+                    <span id="lbl-entry">Entry Price (₹)</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3 text-sm font-medium text-slate-400">₹</span>
+                    <input type="number" id="inp-entry" value="100" step="0.05" oninput="runTerminalCalculation()" class="w-full pl-7 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                  </div>
+                  <!-- Steps selectors -->
+                  <div class="flex justify-end gap-1 pt-1">
+                    <button onclick="adjustPriceValue('inp-entry', -5)" class="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 w-8 h-6 flex items-center justify-center rounded font-semibold">-5</button>
+                    <button onclick="adjustPriceValue('inp-entry', -1)" class="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 w-8 h-6 flex items-center justify-center rounded font-semibold">-1</button>
+                    <button onclick="adjustPriceValue('inp-entry', 1)" class="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 w-8 h-6 flex items-center justify-center rounded font-semibold">+1</button>
+                    <button onclick="adjustPriceValue('inp-entry', 5)" class="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 w-8 h-6 flex items-center justify-center rounded font-semibold">+5</button>
+                  </div>
+                </div>
+
+                <!-- Leverage Slider -->
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <label id="lbl-leverage" class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide">Leverage</label>
+                    <span id="leverage-val-indicator" class="text-xs font-bold text-[var(--color-accent)] bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded">5x</span>
+                  </div>
+                  <div class="pt-2">
+                    <input type="range" id="inp-leverage" min="1" max="10" value="5" oninput="updateLeverageValue(this.value)" class="w-full cursor-pointer">
+                  </div>
+                  <!-- Quick leverage buttons -->
+                  <div class="flex justify-between gap-1 pt-1.5">
+                    <button onclick="updateLeverageValue(1)" class="text-[9px] font-bold flex-1 bg-slate-200 dark:bg-slate-800/40 py-1 rounded">1x</button>
+                    <button onclick="updateLeverageValue(3)" class="text-[9px] font-bold flex-1 bg-slate-200 dark:bg-slate-800/40 py-1 rounded">3x</button>
+                    <button onclick="updateLeverageValue(5)" class="text-[9px] font-bold flex-1 bg-slate-200 dark:bg-slate-800/40 py-1 rounded">5x</button>
+                    <button onclick="updateLeverageValue(10)" class="text-[9px] font-bold flex-1 bg-slate-200 dark:bg-slate-800/40 py-1 rounded">10x</button>
+                  </div>
+                </div>
+
+                <!-- Risk / Loss Goal -->
+                <div class="space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide flex justify-between">
+                    <span id="lbl-risk-goal">Risk / Loss Goal (₹)</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3 text-sm font-medium text-slate-400">₹</span>
+                    <input type="number" id="inp-risk" value="2000" oninput="runTerminalCalculation()" class="w-full pl-7 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                  </div>
+                  <div class="flex justify-end gap-1.5 pt-1.5">
+                    <button onclick="adjustPriceValue('inp-risk', -500)" class="text-[10px] font-medium bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">-500</button>
+                    <button onclick="adjustPriceValue('inp-risk', 500)" class="text-[10px] font-medium bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">+500</button>
+                  </div>
+                </div>
+
+                <!-- Profit Goal -->
+                <div class="sm:col-span-2 space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide flex justify-between">
+                    <span id="lbl-profit-goal">Profit Goal (₹)</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3 text-sm font-medium text-slate-400">₹</span>
+                    <input type="number" id="inp-profit" value="4000" oninput="runTerminalCalculation()" class="w-full pl-7 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                  </div>
+                  <!-- Risk multiple quick selectors -->
+                  <div class="flex flex-wrap gap-1.5 pt-1">
+                    <button onclick="applyRiskMultiple(1.5)" class="text-[10px] font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded border border-emerald-500/10">1.5x Risk (₹<span id="mult-1-5-lbl">3000</span>)</button>
+                    <button onclick="applyRiskMultiple(2.0)" class="text-[10px] font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded border border-emerald-500/10">2x Risk (₹<span id="mult-2-lbl">4000</span>)</button>
+                    <button onclick="applyRiskMultiple(3.0)" class="text-[10px] font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded border border-emerald-500/10">3x Risk (₹<span id="mult-3-lbl">6000</span>)</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Terminal output overview cards -->
+            <div class="lg:col-span-5 flex flex-col justify-between glass-card rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-6">
+              
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span id="lbl-calculated-scen" class="text-xs font-mono uppercase tracking-widest text-slate-400">STATION CALCULATION</span>
+                  <span id="side-tag" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 uppercase tracking-widest">BUY (LONG)</span>
+                </div>
+
+                <!-- Order Quantity Big Display -->
+                <div class="bg-slate-200/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-300/30 dark:border-white/5 flex justify-between items-center">
+                  <div>
+                    <span id="lbl-out-qty" class="text-xs text-slate-500 dark:text-slate-400 font-medium">calculated Ticket Qty</span>
+                    <h2 id="out-qty" class="text-4xl font-display font-extrabold tracking-tight mt-1 text-slate-800 dark:text-slate-100 font-mono">500</h2>
+                  </div>
+                  <i data-lucide="hash" class="w-8 h-8 text-slate-400 dark:text-slate-700 opacity-40"></i>
+                </div>
+
+                <!-- Target & Stop Loss Prices -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
+                    <span id="lbl-out-target" class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 block uppercase tracking-wider">Target Price</span>
+                    <h3 id="out-target" class="text-xl font-mono font-bold text-emerald-500 mt-1">₹108.00</h3>
+                  </div>
+                  <div class="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl">
+                    <span id="lbl-out-sl" class="text-[10px] font-semibold text-rose-600 dark:text-rose-400 block uppercase tracking-wider">Stop Loss Price</span>
+                    <h3 id="out-sl" class="text-xl font-mono font-bold text-rose-500 mt-1">₹96.00</h3>
+                  </div>
+                </div>
+
+                <!-- Margin Used, Total Position, R:R Ratio -->
+                <div class="grid grid-cols-3 gap-2 bg-slate-200/50 dark:bg-slate-950/50 p-3 rounded-xl text-center divide-x divide-slate-300 dark:divide-slate-800">
+                  <div class="p-1">
+                    <span id="lbl-out-margin" class="block text-[8px] font-mono text-slate-500 dark:text-slate-400 uppercase">Margin Used</span>
+                    <span id="out-margin" class="text-xs font-mono font-bold block mt-1 text-slate-800 dark:text-slate-100">₹10,000</span>
+                  </div>
+                  <div class="p-1 px-2">
+                    <span id="lbl-out-position" class="block text-[8px] font-mono text-slate-500 dark:text-slate-400 uppercase">Position size</span>
+                    <span id="out-position" class="text-xs font-mono font-bold block mt-1 text-slate-800 dark:text-slate-100">₹50,000</span>
+                  </div>
+                  <div class="p-1">
+                    <span id="lbl-out-rr" class="block text-[8px] font-mono text-slate-500 dark:text-slate-400 uppercase">R:R Ratio</span>
+                    <span id="out-rr" class="text-xs font-mono font-extrabold text-[var(--color-accent)] block mt-1">1 : 2.0</span>
+                  </div>
+                </div>
+
+                <!-- Interactive Visual Map (TradingView Style) -->
+                <div class="bg-slate-200/30 dark:bg-slate-950/30 p-3 rounded-2xl border border-slate-300/30 dark:border-white/5 space-y-1.5">
+                  <div class="flex justify-between items-center text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                    <span class="text-rose-500 font-semibold" id="vis-sl-price-label">SL Price: ₹96.00</span>
+                    <span class="text-[var(--color-accent)] font-bold uppercase" id="vis-entry-price-label">Entry Price: ₹100.00</span>
+                    <span class="text-emerald-500 font-semibold" id="vis-target-price-label">Target: ₹108.00</span>
+                  </div>
+                  <div class="h-4 w-full rounded-lg overflow-hidden flex relative border border-slate-300/40 dark:border-white/5">
+                    <!-- Red loss region -->
+                    <div id="vis-bar-loss" class="w-1/2 bg-rose-500/25 border-r border-rose-500/40 h-full"></div>
+                    <!-- Green profit region -->
+                    <div id="vis-bar-profit" class="w-1/2 bg-emerald-500/25 h-full"></div>
+                    <!-- Pivot ticks slider centered -->
+                    <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-[var(--color-accent)] shadow-[0_0_8px_var(--color-accent)] -translate-x-1/2 z-10"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Setup Save block -->
+              <div class="pt-4 border-t border-slate-300/40 dark:border-white/10 space-y-3">
+                <div class="relative flex items-center">
+                  <input type="text" id="inp-save-calc-name" class="w-full pl-3 pr-28 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white/40 dark:bg-slate-950/40 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[var(--color-accent)] font-medium" placeholder="Custom name e.g., Nifty Options">
+                  <button onclick="saveTerminalSetup()" class="absolute right-1 px-4 py-1.5 rounded-lg text-white font-semibold text-[10px] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] transition-all flex items-center gap-1 shadow-lg">
+                    <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                    <span id="btn-save-setup">Save Setup</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Saved Calculations Card Listing -->
+          <div class="glass-card rounded-3xl p-6 shadow-xl space-y-4">
+            <h4 class="text-md font-bold font-display text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4 text-indigo-500"></i>
+              <span id="title-saved-list">Saved Calculations List</span>
+            </h4>
+            <div id="saved-list-empty-placeholder" class="text-center text-xs text-slate-400 py-6 font-mono">
+              Empty List. Enter details and click 'Save Setup' above.
+            </div>
+            <div id="saved-list-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[30rem] overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. P&L SIMULATOR SCREEN -->
+        <section id="pnl-screen" class="hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Inputs Panel -->
+            <div class="lg:col-span-6 glass-card rounded-3xl p-6 shadow-xl space-y-5">
+              <div class="flex justify-between items-center border-b border-slate-300/30 dark:border-white/10 pb-3">
+                <h3 class="text-lg font-bold font-display text-[var(--color-accent)] flex items-center gap-2">
+                  <i data-lucide="trending-up" class="w-5 h-5"></i>
+                  <span id="title-pnl">P&L Simulator</span>
+                </h3>
+                <div class="flex bg-slate-200/60 dark:bg-slate-950 p-1 rounded-xl w-44 border border-slate-300/30 dark:border-white/5">
+                  <button onclick="setPLSimulatorSide('BUY')" id="pl-side-buy-btn" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-white bg-emerald-500 shadow-sm">BUY</button>
+                  <button onclick="setPLSimulatorSide('SELL')" id="pl-side-sell-btn" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">SELL</button>
+                </div>
+              </div>
+
+              <!-- Input metrics form -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- Entry Price -->
+                <div class="space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    <span id="lbl-pl-entry">Entry Price (₹)</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3 text-sm font-medium text-slate-400">₹</span>
+                    <input type="number" id="inp-pl-entry" value="100" oninput="runPLCalculation()" class="w-full pl-7 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                  </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    <span id="lbl-pl-qty">Quantity (Qty)</span>
+                  </label>
+                  <input type="number" id="inp-pl-qty" value="500" oninput="runPLCalculation()" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                </div>
+
+                <!-- Exit Price -->
+                <div class="space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    <span id="lbl-pl-exit">Exit Price (₹)</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3 text-sm font-medium text-slate-400">₹</span>
+                    <input type="number" id="inp-pl-exit" value="108" placeholder="Enter Exit Price" oninput="runPLCalculation()" class="w-full pl-7 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                  </div>
+                </div>
+
+                <!-- SL Price -->
+                <div class="space-y-1">
+                  <label class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    <span id="lbl-pl-sl">Stop Loss Price (₹)</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3 text-sm font-medium text-slate-400">₹</span>
+                    <input type="number" id="inp-pl-sl" value="96" placeholder="Enter SL Price" oninput="runPLCalculation()" class="w-full pl-7 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/40 font-mono text-sm focus:outline-none focus:border-[var(--color-accent)] font-semibold shadow-inner">
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Warning state -->
+              <div id="pl-calculation-status-msg" class="hidden text-center text-xs font-medium text-amber-500 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl font-mono">
+                Please enter both valid Exit Price and SL Price to unlock simulator.
+              </div>
+            </div>
+
+            <!-- Simulation Dashboard Outlet -->
+            <div class="lg:col-span-6 flex flex-col justify-between glass-card rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-6">
+              
+              <div class="space-y-5">
+                <div class="flex justify-between items-center">
+                  <span id="lbl-simulated-scen" class="text-xs font-mono uppercase tracking-widest text-slate-400">SIMULATION DASHBOARD</span>
+                  <span id="pl-side-tag" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 uppercase tracking-widest">BUY (LONG)</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <!-- Potential Profit scenario -->
+                  <div class="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                      <span id="lbl-pnl-out-profit" class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 block uppercase tracking-wider">Simulated Target Profit</span>
+                      <h3 id="pl-out-profit-val" class="text-2xl font-mono font-bold text-emerald-500 mt-2">₹4,000.00</h3>
+                      <span id="pl-out-profit-pct" class="text-xs font-mono font-semibold text-emerald-600 dark:text-emerald-400 block mt-1">+8.00%</span>
+                    </div>
+                  </div>
+
+                  <!-- Potential Stop loss scenario -->
+                  <div class="bg-rose-500/10 border border-rose-500/20 p-5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                      <span id="lbl-pnl-out-loss" class="text-[10px] font-semibold text-rose-600 dark:text-rose-400 block uppercase tracking-wider">Simulated SL Loss</span>
+                      <h3 id="pl-out-loss-val" class="text-2xl font-mono font-bold text-rose-500 mt-2">₹2,000.00</h3>
+                      <span id="pl-out-loss-pct" class="text-xs font-mono font-semibold text-rose-600 dark:text-rose-400 block mt-1">-4.00%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Total realised exit position value -->
+                <div class="bg-slate-200/50 dark:bg-slate-950/50 p-4 rounded-xl border border-slate-300/30 dark:border-white/5 flex justify-between items-center">
+                  <div>
+                    <span id="lbl-pnl-out-exitval" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Realized Value at Target/Exit</span>
+                    <h2 id="pl-out-total-val" class="text-2xl font-mono font-bold mt-1 text-slate-800 dark:text-slate-100">₹54,000.00</h2>
+                  </div>
+                  <i data-lucide="circle-dash" class="w-8 h-8 text-slate-400 dark:text-slate-700 opacity-40"></i>
+                </div>
+              </div>
+
+              <!-- Save Record forms footer slider -->
+              <div class="pt-4 border-t border-slate-300/40 dark:border-white/10 space-y-3">
+                <div class="relative flex items-center">
+                  <input type="text" id="inp-save-pl-name" class="w-full pl-3 pr-28 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white/40 dark:bg-slate-950/40 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[var(--color-accent)] font-medium" placeholder="Custom name e.g. Day Trade BankNifty">
+                  <button onclick="savePLSimulatorRecord()" class="absolute right-1 px-4 py-1.5 rounded-lg text-white font-semibold text-[10px] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] transition-all flex items-center gap-1 shadow-lg">
+                    <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                    <span id="btn-save-sim">Save Setup</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Saved PL List listing -->
+          <div class="glass-card rounded-3xl p-6 shadow-xl space-y-4">
+            <h4 class="text-md font-bold font-display text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-lucide="folder-search" class="w-4 h-4 text-amber-500"></i>
+              <span id="title-pnl-list font-bold">Recent Simulated Saved Trades</span>
+            </h4>
+            <div id="saved-pnl-empty-placeholder" class="text-center text-xs text-slate-400 py-6 font-mono">
+              Empty List. Enter pricing details and click 'Save Setup' above.
+            </div>
+            <div id="saved-pnl-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[30rem] overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. SETTINGS SCREEN -->
+        <section id="settings-screen" class="hidden space-y-6">
+          <div class="glass-card rounded-3xl p-6 lg:p-8 shadow-xl max-w-2xl mx-auto space-y-6">
+            
+            <h3 class="text-xl font-bold font-display text-[var(--color-accent)] flex items-center gap-2 border-b border-slate-300/30 dark:border-white/10 pb-3">
+              <i data-lucide="sliders" class="w-5 h-5"></i>
+              <span id="title-settings">Settings</span>
+            </h3>
+
+            <!-- Language Section -->
+            <div class="space-y-3">
+              <label id="lbl-set-lang" class="text-xs font-mono text-slate-400 dark:text-slate-400 uppercase tracking-widest block">Language / भाषा</label>
+              <div class="flex gap-3">
+                <button onclick="toggleSettingLanguage('en')" id="set-lang-en" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm border border-slate-300 dark:border-slate-800 transition-all flex items-center justify-center gap-2">
+                  <span class="text-md">🇬🇧</span> English
+                </button>
+                <button onclick="toggleSettingLanguage('mr')" id="set-lang-mr" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm border border-slate-300 dark:border-slate-800 transition-all flex items-center justify-center gap-2">
+                  <span class="text-md">🇮🇳</span> मराठी (Marathi)
+                </button>
+              </div>
+            </div>
+
+            <!-- Theme Accent selection swatches -->
+            <div class="space-y-3">
+              <label id="lbl-set-accent" class="text-xs font-mono text-slate-400 dark:text-slate-400 uppercase tracking-widest block">Theme Accent Color</label>
+              <div class="flex flex-wrap gap-4 items-center">
+                <button onclick="applyAccentTheme('blue')" id="acc-blue" class="w-10 h-10 rounded-full bg-[#2962ff] hover:scale-110 active:scale-95 transition-all text-white font-bold inline-flex items-center justify-center"></button>
+                <button onclick="applyAccentTheme('orange')" id="acc-orange" class="w-10 h-10 rounded-full bg-[#f54f24] hover:scale-110 active:scale-95 transition-all text-white font-bold inline-flex items-center justify-center"></button>
+                <button onclick="applyAccentTheme('emerald')" id="acc-emerald" class="w-10 h-10 rounded-full bg-[#10b981] hover:scale-110 active:scale-95 transition-all text-white font-bold inline-flex items-center justify-center"></button>
+                <button onclick="applyAccentTheme('gold')" id="acc-gold" class="w-10 h-10 rounded-full bg-[#f59e0b] hover:scale-110 active:scale-95 transition-all text-white font-bold inline-flex items-center justify-center"></button>
+                <button onclick="applyAccentTheme('pink')" id="acc-pink" class="w-10 h-10 rounded-full bg-[#ec4899] hover:scale-110 active:scale-95 transition-all text-white font-bold inline-flex items-center justify-center"></button>
+              </div>
+            </div>
+
+            <!-- Vibe Background choices -->
+            <div class="space-y-3">
+              <label id="lbl-set-bg" class="text-xs font-mono text-slate-400 dark:text-slate-400 uppercase tracking-widest block">Background Style Accent</label>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <button onclick="applyBgVibeStyle('indigo')" id="bgv-indigo" class="py-2.5 px-3 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-800 hover:scale-[1.03] transition-all text-center">Indigo Deep</button>
+                <button onclick="applyBgVibeStyle('carbon')" id="bgv-carbon" class="py-2.5 px-3 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-800 hover:scale-[1.03] transition-all text-center">Stealth Carbon</button>
+                <button onclick="applyBgVibeStyle('forest')" id="bgv-forest" class="py-2.5 px-3 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-800 hover:scale-[1.03] transition-all text-center">Forest Spruce</button>
+                <button onclick="applyBgVibeStyle('amethyst')" id="bgv-amethyst" class="py-2.5 px-3 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-800 hover:scale-[1.03] transition-all text-center">Amethyst Orchid</button>
+                <button onclick="applyBgVibeStyle('slate')" id="bgv-slate" class="py-2.5 px-3 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-800 hover:scale-[1.03] transition-all text-center">Metal Slate</button>
+              </div>
+            </div>
+
+            <!-- Workspace Mode -->
+            <div class="space-y-3">
+              <label id="lbl-set-shade" class="text-xs font-mono text-slate-400 dark:text-slate-400 uppercase tracking-widest block">Workspace shade mode</label>
+              <div class="flex gap-3">
+                <button onclick="toggleLightDarkMode(true)" id="shade-dark-btn" class="flex-1 py-3 px-4 rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-800 transition-all flex items-center justify-center gap-2">
+                  <i data-lucide="moon" class="w-4 h-4"></i>
+                  <span id="txt-dark-mode">Dark Workspace</span>
+                </button>
+                <button onclick="toggleLightDarkMode(false)" id="shade-light-btn" class="flex-1 py-3 px-4 rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-800 transition-all flex items-center justify-center gap-2">
+                  <i data-lucide="sun" class="w-4 h-4"></i>
+                  <span id="txt-light-mode">Light Workspace</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Logout button -->
+            <div class="pt-6 border-t border-slate-300/40 dark:border-white/10 flex justify-end">
+              <button onclick="triggerLogout()" class="w-full sm:w-auto py-3.5 px-6 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-bold text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                <span id="btn-logout-text">Log Out Safety Terminal</span>
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <!-- BOTTOM NAVIGATION BAR -->
+      <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md border-t border-slate-200/50 dark:border-slate-800/80 px-6 py-3 pb-safe shadow-2xl">
+        <div class="max-w-md mx-auto flex justify-between items-center bg-slate-200/50 dark:bg-slate-950/50 p-1 rounded-2xl border border-slate-300/30 dark:border-white/5">
+          <!-- Terminal Button -->
+          <button onclick="switchActiveTab('terminal')" id="nav-terminal" class="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-350 text-slate-500 dark:text-slate-400">
+            <i data-lucide="calculator" class="w-5 h-5 animate-pulse-slow"></i>
+            <span class="text-[10px] font-semibold" id="nav-btn-lbl-terminal">Terminal</span>
+          </button>
+          
+          <!-- P&L Button -->
+          <button onclick="switchActiveTab('pnl')" id="nav-pnl" class="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-350 text-slate-500 dark:text-slate-400">
+            <i data-lucide="trending-up" class="w-5 h-5"></i>
+            <span class="text-[10px] font-semibold" id="nav-btn-lbl-pnl">P&L Simulator</span>
+          </button>
+          
+          <!-- Settings Button -->
+          <button onclick="switchActiveTab('settings')" id="nav-settings" class="flex-1 flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-350 text-slate-500 dark:text-slate-400">
+            <i data-lucide="sliders" class="w-5 h-5 font-bold"></i>
+            <span class="text-[10px] font-semibold" id="nav-btn-lbl-settings">Settings</span>
+          </button>
+        </div>
+      </nav>
+
+    </div>
+
+    <!-- MAIN APP SCRIPT -->
+    <script>
+      // 1. Language mappings (English & Marathi translation)
+      const languageData = {
+        en: {
+          login_subtitle: "Trade Calculation Suite",
+          login_welcome_title: "Welcome to Pro Stock AI",
+          login_welcome_desc: "Configure premium setups, simulate profits/losses, and lock your risk matrix.",
+          login_name_label: "Enter User Name / नाव प्रविष्ट करा",
+          login_submit_btn: "Access Station",
+          header_subtitle: "Professional Trade Suite",
+          title_terminal: "Terminal Calculator",
+          lbl_capital: "Capital / Margin (₹)",
+          lbl_entry: "Entry Price (₹)",
+          lbl_leverage: "Leverage",
+          lbl_risk_goal: "Risk / Loss Goal (₹)",
+          lbl_profit_goal: "Profit Goal (₹)",
+          "lbl-calculated-scen": "Station Calculation",
+          "lbl-out-qty": "Calculated Ticket Qty",
+          "lbl-out-target": "Target Price",
+          "lbl-out-sl": "Stop Loss Price",
+          "lbl-out-margin": "Margin Used",
+          "lbl-out-position": "Position Size",
+          "lbl-out-rr": "R:R Ratio",
+          btn_save_setup: "Save Setup",
+          title_saved_list: "Saved Calculations List",
+          saved_list_empty_placeholder: "Empty List. Enter details and click 'Save Setup' above.",
+          title_pnl: "P&L Simulator",
+          "lbl-pl-entry": "Entry Price (₹)",
+          "lbl-pl-qty": "Quantity (Qty)",
+          "lbl-pl-exit": "Exit Price (₹)",
+          "lbl-pl-sl": "Stop Loss Price (₹)",
+          pl_calculation_status_msg: "Please enter both valid Exit Price & SL Price to unlock simulator.",
+          "lbl-simulated-scen": "Simulation Dashboard",
+          "lbl-pnl-out-profit": "Target Profit Outcome",
+          "lbl-pnl-out-loss": "Trade SL Loss Outcome",
+          "lbl-pnl-out-exitval": "Total Value at Exit (Exit × Qty)",
+          btn_save_sim: "Save Setup",
+          title_pnl_list: "Recent Simulated Saved Trades",
+          saved_pnl_empty_placeholder: "Empty List. Enter pricing details and click 'Save Setup' above.",
+          title_settings: "Settings",
+          "lbl-set-lang": "Language / भाषा",
+          "lbl-set-accent": "Theme Accent Color",
+          "lbl-set-bg": "Background Style Vibe",
+          "lbl-set-shade": "Workspace shade mode",
+          "txt_dark-mode": "Dark Workspace",
+          "txt_light-mode": "Light Workspace",
+          "btn_logout_text": "Log Out Safety Terminal",
+          nav_btn_lbl_terminal: "Terminal",
+          nav_btn_lbl_pnl: "P&L Simulator",
+          nav_btn_lbl_settings: "Settings",
+          welcome_message: "Trader: ",
+          risk_range_error: "Risk Goal or Entry Price cannot be 0",
+          valid_price_warn: "Target or SL Price contains invalid amounts"
+        },
+        mr: {
+          login_subtitle: "ट्रेड मोजणी केंद्र (कॅल्क्युलेटर)",
+          login_welcome_title: "प्रो स्टॉक एआय मध्ये स्वागत आहे",
+          login_welcome_desc: "प्रीमियम ट्रेडिंग सेटअपची रचना करा, संभाव्य नफा-तोटा तपासा आणि जोखीम व्यवस्थापन सुधारा.",
+          login_name_label: "वापरकर्त्याचे नाव प्रविष्ट करा",
+          login_submit_btn: "स्टेशन प्रवेश करा",
+          header_subtitle: "व्यावसायिक ट्रेडिंग गणिते",
+          title_terminal: "टर्मिनल कॅल्क्युलेटर",
+          lbl_capital: "एकूण भांडवल / मार्जिन (₹)",
+          lbl_entry: "प्रवेश किंमत - Entry (₹)",
+          lbl_leverage: "लेव्हरेज (X)",
+          lbl_risk_goal: "जोखीम / तोटा उद्दिष्ट (₹)",
+          lbl_profit_goal: "नफा उद्दिष्ट (₹)",
+          "lbl-calculated-scen": "स्टेशन हिशोब",
+          "lbl-out-qty": "ऑर्डर प्रमाण (Qty)",
+          "lbl-out-target": "लक्ष्य किंमत - Target Price",
+          "lbl-out-sl": "स्टॉप लॉस - Stop Loss Price",
+          "lbl-out-margin": "वापरलेले मार्जिन",
+          "lbl-out-position": "एकूण पोझिशन आकार",
+          "lbl-out-rr": "जोखीम-नफा प्रमाण (R:R)",
+          btn_save_setup: "सेटअप जतन करा",
+          title_saved_list: "जतन केलेले सक्रिय सेटअप्स",
+          saved_list_empty_placeholder: "कोणतेही जतन केलेले हिशोब नाहीत. वर माहिती भरून 'सेटअप जतन करा' करा.",
+          title_pnl: "पी&एल सिम्युलेटर (P&L)",
+          "lbl-pl-entry": "प्रवेश किंमत (₹)",
+          "lbl-pl-qty": "प्रमाण (Qty)",
+          "lbl-pl-exit": "बाहेर पडण्याची किंमत - Exit (₹)",
+          "lbl-pl-sl": "स्टॉप लॉस किंमत - SL Price (₹)",
+          pl_calculation_status_msg: "कृपया सिम्युलेशन अनलॉक करण्यासाठी बाहेर पडण्याची किंमत आणि SL प्रविष्ट करा.",
+          "lbl-simulated-scen": "सिम्युलेटर डॅशबोर्ड",
+          "lbl-pnl-out-profit": "संभाव्य ट्रेड नफा (Target)",
+          "lbl-pnl-out-loss": "संभाव्य ट्रेड तोटा (SL)",
+          "lbl-pnl-out-exitval": "बाहेर पडताना मिळणारे एकूण मूल्य (Exit × Qty)",
+          btn_save_sim: "सिम जतन करा",
+          title_pnl_list: "नुकतेच सिम्युलेट केलेले ट्रेड्स",
+          saved_pnl_empty_placeholder: "कोणतीही सिम्युलेशन जतन केलेली नाहीत. माहिती भरून जतन करा.",
+          title_settings: "सेटिंग्ज",
+          "lbl-set-lang": "भाषा / Language",
+          "lbl-set-accent": "थीम हायलाईट रंग निवड",
+          "lbl-set-bg": "पार्श्वभूमी शैली निवड",
+          "lbl-set-shade": "डॅशबोर्डचा रंग",
+          "txt_dark-mode": "डार्क मोड",
+          "txt_light-mode": "लाईट मोड",
+          "btn_logout_text": "लॉग आउट सुरक्षितता",
+          nav_btn_lbl_terminal: "टर्मिनल",
+          nav_btn_lbl_pnl: "सिम्युलेटर",
+          nav_btn_lbl_settings: "सेटिंग्ज",
+          welcome_message: "ट्रेडर: ",
+          risk_range_error: "किंमत किंवा तोटा शून्य असणार नाही",
+          valid_price_warn: "पॉईंट आणि किमती तपासून घ्या"
+        }
+      };
+
+      // 2. Swatches Styling Constants
+      const accentSwatches = {
+        blue: { primary: '#2962ff', hover: '#1546cb', glow: 'rgba(41, 98, 255, 0.4)' },
+        orange: { primary: '#f54f24', hover: '#da3c14', glow: 'rgba(245, 79, 36, 0.4)' },
+        emerald: { primary: '#10b981', hover: '#0d9488', glow: 'rgba(16, 185, 129, 0.4)' },
+        gold: { primary: '#f59e0b', hover: '#d97706', glow: 'rgba(245, 158, 11, 0.4)' },
+        pink: { primary: '#ec4899', hover: '#db2777', glow: 'rgba(236, 72, 153, 0.4)' }
+      };
+
+      const bgStyleVibes = {
+        indigo: 'radial-gradient(circle at top, #0f172a 0%, #020617 100%)',
+        carbon: 'radial-gradient(circle at top, #1e1e1e 0%, #0c0c0c 100%)',
+        forest: 'radial-gradient(circle at top, #062f21 0%, #010a07 100%)',
+        amethyst: 'radial-gradient(circle at top, #2e1065 0%, #09021a 100%)',
+        slate: 'radial-gradient(circle at top, #1e293b 0%, #0f172a 100%)',
+        
+        // Light equivalents
+        light_indigo: 'radial-gradient(circle at top, #f1f5f9 0%, #cbd5e1 100%)',
+        light_carbon: 'radial-gradient(circle at top, #f3f4f6 0%, #e5e7eb 100%)',
+        light_forest: 'radial-gradient(circle at top, #ecfdf5 0%, #d1fae5 100%)',
+        light_amethyst: 'radial-gradient(circle at top, #faf5ff 0%, #f3e8ff 100%)',
+        light_slate: 'radial-gradient(circle at top, #f8fafc 0%, #e2e8f0 100%)'
+      };
+
+      // 3. App State Object & Local Storage bindings
+      const defaultState = {
+        currentUser: null,
+        language: 'en',
+        accentTheme: 'blue',
+        bgStyleVibe: 'indigo',
+        isDarkMode: true,
+        activeTab: 'terminal',
+        terminalSide: 'BUY',
+        plSide: 'BUY'
+      };
+
+      let state = { ...defaultState };
+      let savedListCalculations = [];
+      let savedListPLSimulator = [];
+
+      // Initializer Function
+      window.addEventListener('DOMContentLoaded', () => {
+        loadPersistedStateAndData();
+        renderActiveLanguage();
+        applyDynamicClientStyles();
+        lucide.createIcons();
+        runTerminalCalculation();
+        runPLCalculation();
+      });
+
+      function loadPersistedStateAndData() {
+        // Core state
+        const storedState = localStorage.getItem('pro_stock_ai_state_v1');
+        if (storedState) {
+          try {
+            state = { ...defaultState, ...JSON.parse(storedState) };
+          } catch (e) {
+            state = { ...defaultState };
+          }
+        }
+        
+        // Saved terminal lists
+        const storedCalcs = localStorage.getItem('pro_stock_ai_calcs_list_v1');
+        if (storedCalcs) {
+          try { savedListCalculations = JSON.parse(storedCalcs); } catch(e) {}
+        }
+        
+        // Saved PL lists
+        const storedPLs = localStorage.getItem('pro_stock_ai_pls_list_v1');
+        if (storedPLs) {
+          try { savedListPLSimulator = JSON.parse(storedPLs); } catch(e) {}
+        }
+
+        // Screen routing condition
+        const loginScreen = document.getElementById('login-container');
+        const mainScreen = document.getElementById('app-container');
+
+        if (state.currentUser) {
+          loginScreen.classList.add('hidden');
+          mainScreen.classList.remove('hidden');
+          document.getElementById('header-user-welcome').innerText = (state.language === 'en' ? 'Trader: ' : 'ट्रेडर: ') + state.currentUser;
+          switchActiveTab(state.activeTab || 'terminal');
+        } else {
+          loginScreen.classList.remove('hidden');
+          mainScreen.classList.add('hidden');
+        }
+
+        renderCalculationsList();
+        renderPLSimulatorList();
+      }
+
+      function persistAppState() {
+        localStorage.setItem('pro_stock_ai_state_v1', JSON.stringify(state));
+      }
+
+      function triggerToast(message, type = 'success') {
+        const wrapper = document.getElementById('toast-wrapper');
+        const toast = document.createElement('div');
+        toast.className = `flex items-center gap-2 p-4 rounded-xl border shadow-xl transition-all duration-300 transform translate-x-4 opacity-0 scale-95 pointer-events-auto ${
+          type === 'success' 
+            ? 'bg-emerald-500/10 dark:bg-emerald-950/80 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
+            : 'bg-rose-500/10 dark:bg-rose-500/10 border-rose-500/30 text-rose-500'
+        }`;
+        
+        toast.innerHTML = `
+          <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-triangle'}" class="w-5 h-5 flex-shrink-0"></i>
+          <span class="text-xs font-semibold">${message}</span>
+        `;
+        
+        wrapper.appendChild(toast);
+        lucide.createIcons();
+
+        // animate in
+        setTimeout(() => {
+          toast.classList.remove('opacity-0', 'translate-x-4', 'scale-95');
+        }, 10);
+
+        // animate out
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-x-[100%]');
+          setTimeout(() => toast.remove(), 400);
+        }, 3500);
+      }
+
+      // 4. Multi-language Translation Engine
+      function renderActiveLanguage() {
+        const lang = state.language;
+        const currentLocal = languageData[lang];
+
+        // Translate placeholders & labels directly using id match
+        for (const [key, text] of Object.entries(currentLocal)) {
+          const element = document.getElementById(key);
+          if (element) {
+            // Check if it's input
+            if (element.tagName === 'INPUT') {
+              element.placeholder = text;
+            } else {
+              element.innerText = text;
+            }
+          }
+        }
+
+        // Custom individual elements with hardcoded mapping
+        const usrInp = document.getElementById('username-input');
+        if (usrInp) usrInp.placeholder = lang === 'en' ? 'E.g., Sujal Jawale' : 'उदा. सुजल जावळे';
+
+        const calcNameInp = document.getElementById('inp-save-calc-name');
+        if (calcNameInp) calcNameInp.placeholder = lang === 'en' ? 'Custom name e.g., Nifty Call Option' : 'नाव प्रविष्ट करा उदा. निफ्टी ऑप्शन्स';
+
+        const plNameInp = document.getElementById('inp-save-pl-name');
+        if (plNameInp) plNameInp.placeholder = lang === 'en' ? 'Custom name e.g., Day Trade' : 'ट्रेड नाव उदा. बँकनिफ्टी सेटअप';
+
+        // Welcome subtitle / heading updates
+        if (state.currentUser) {
+          document.getElementById('header-user-welcome').innerText = (lang === 'en' ? 'Trader: ' : 'ट्रेडर: ') + state.currentUser;
+        }
+
+        // Selected highlights
+        const enBtn = document.getElementById('set-lang-en');
+        const mrBtn = document.getElementById('set-lang-mr');
+        if (enBtn && mrBtn) {
+          if (lang === 'en') {
+            enBtn.className = "flex-1 py-3 px-4 rounded-xl font-bold text-sm border transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-hover)] text-white border-transparent";
+            mrBtn.className = "flex-grow py-3 px-4 rounded-xl font-medium text-sm border border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent flex items-center justify-center gap-2";
+          } else {
+            mrBtn.className = "flex-grow py-3 px-4 rounded-xl font-bold text-sm border transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-hover)] text-white border-transparent";
+            enBtn.className = "flex-1 py-3 px-4 rounded-xl font-medium text-sm border border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent flex items-center justify-center gap-2";
+          }
+        }
+      }
+
+      function toggleSettingLanguage(langCode) {
+        state.language = langCode;
+        persistAppState();
+        renderActiveLanguage();
+        runTerminalCalculation();
+        runPLCalculation();
+        renderCalculationsList();
+        renderPLSimulatorList();
+        triggerToast(langCode === 'en' ? 'Language switched to English' : 'भाषा मराठी मध्ये बदलली आहे', 'success');
+      }
+
+      // 5. Themes Selection Methods
+      function applyAccentTheme(themeName) {
+        state.accentTheme = themeName;
+        persistAppState();
+        applyDynamicClientStyles();
+        renderActiveLanguage();
+        triggerToast(state.language === 'en' ? `Accent theme set to ${themeName}` : `सक्रिय थीम रंग ${themeName} वर सेट केला`, 'success');
+      }
+
+      function applyBgVibeStyle(vibeName) {
+        state.bgStyleVibe = vibeName;
+        persistAppState();
+        applyDynamicClientStyles();
+        triggerToast(state.language === 'en' ? 'Background style changed' : 'पार्श्वभूमी शैली बदलली आहे', 'success');
+      }
+
+      function toggleLightDarkMode(isDark) {
+        state.isDarkMode = isDark;
+        persistAppState();
+        applyDynamicClientStyles();
+        
+        const rootHtml = document.documentElement;
+        if (isDark) {
+          rootHtml.classList.add('dark');
+        } else {
+          rootHtml.classList.remove('dark');
+        }
+
+        // Button state classes toggling
+        const darkBtn = document.getElementById('shade-dark-btn');
+        const lightBtn = document.getElementById('shade-light-btn');
+        if (darkBtn && lightBtn) {
+          if (isDark) {
+            darkBtn.className = "flex-grow py-3 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 bg-slate-800 border-white/10 text-[var(--color-accent)]";
+            lightBtn.className = "flex-grow py-3 px-4 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-800 text-slate-400 bg-transparent transition-all flex items-center justify-center gap-2";
+          } else {
+            lightBtn.className = "flex-grow py-3 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 bg-white border-slate-300 text-[var(--color-accent)] shadow-md";
+            darkBtn.className = "flex-grow py-3 px-4 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-800 text-slate-500 bg-transparent transition-all flex items-center justify-center gap-2";
+          }
+        }
+      }
+
+      function applyDynamicClientStyles() {
+        // Accent styles Injection
+        const selSwatch = accentSwatches[state.accentTheme || 'blue'];
+        const styleTag = document.getElementById('dynamic-theme-styles');
+        
+        let bgKey = state.bgStyleVibe || 'indigo';
+        if (!state.isDarkMode) {
+          bgKey = 'light_' + bgKey;
+        }
+        const gradStyleValue = bgStyleVibes[bgKey] || bgStyleVibes['indigo'];
+
+        styleTag.innerHTML = `
+          :root {
+            --color-accent: ${selSwatch.primary};
+            --color-accent-hover: ${selSwatch.hover};
+            --color-accent-glow: ${selSwatch.glow};
+          }
+          body {
+            background: ${gradStyleValue} !important;
+            background-repeat: no-repeat !important;
+            background-attachment: fixed !important;
+          }
+        `;
+
+        // Highlight selected buttons dynamically
+        const borderCls = 'border-[var(--color-accent)] shadow-[0_0_10px_var(--color-accent-glow)] scale-105';
+        ['indigo', 'carbon', 'forest', 'amethyst', 'slate'].forEach(x => {
+          const btn = document.getElementById('bgv-' + x);
+          if (btn) {
+            if (state.bgStyleVibe === x) {
+              btn.className = `py-2.5 px-3 text-xs font-bold rounded-xl border text-[var(--color-accent)] ${borderCls}`;
+            } else {
+              btn.className = `py-2.5 px-3 text-xs font-semibold rounded-xl border border-slate-350 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/40 hover:bg-slate-200/50 dark:hover:bg-slate-800/80 transition-all text-center text-slate-600 dark:text-slate-300`;
+            }
+          }
+        });
+
+        // Highlights Theme swatches indicators
+        ['blue', 'orange', 'emerald', 'gold', 'pink'].forEach(color => {
+          const btn = document.getElementById('acc-' + color);
+          if (btn) {
+            if (state.accentTheme === color) {
+              btn.innerHTML = `<i data-lucide="check" class="w-5 h-5 text-white"></i>`;
+              btn.style.boxShadow = `0 0 15px ${accentSwatches[color].glow}`;
+            } else {
+              btn.innerHTML = '';
+              btn.style.boxShadow = 'none';
+            }
+          }
+        });
+
+        // Update active shades toggles classes
+        toggleLightDarkMode(state.isDarkMode);
+        lucide.createIcons();
+      }
+
+      // 6. Navigation Tabs router
+      function switchActiveTab(tabId) {
+        state.activeTab = tabId;
+        persistAppState();
+
+        // Pane toggling
+        const panes = ['terminal-screen', 'pnl-screen', 'settings-screen'];
+        panes.forEach(pane => {
+          const element = document.getElementById(pane);
+          if (element) {
+            if (pane.startsWith(tabId)) {
+              element.classList.remove('hidden');
+              element.classList.add('animate-fade-in');
+            } else {
+              element.classList.add('hidden');
+            }
+          }
+        });
+
+        // Navigation visual triggers
+        ['terminal', 'pnl', 'settings'].forEach(x => {
+          const navBtn = document.getElementById('nav-' + x);
+          if (navBtn) {
+            if (x === tabId) {
+              navBtn.classList.add('active-tab-nav');
+              navBtn.classList.remove('text-slate-500', 'dark:text-slate-400');
+            } else {
+              navBtn.classList.remove('active-tab-nav');
+              navBtn.classList.add('text-slate-500', 'dark:text-slate-400');
+            }
+          }
+        });
+      }
+
+      // 7. Login Submission
+      function handleLoginSubmit(event) {
+        event.preventDefault();
+        const usernameVal = document.getElementById('username-input').value.trim();
+        if (!usernameVal) return;
+
+        state.currentUser = usernameVal;
+        state.activeTab = 'terminal';
+        persistAppState();
+
+        // Switch Screen animations
+        document.getElementById('login-container').classList.add('hidden');
+        document.getElementById('app-container').classList.remove('hidden');
+        
+        renderActiveLanguage();
+        applyDynamicClientStyles();
+        switchActiveTab('terminal');
+        
+        triggerToast(state.language === 'en' ? `Station accessed. Welcome, ${usernameVal}!` : `स्टेशन सुरू झाले. स्वागत आहे, ${usernameVal}!`, 'success');
+      }
+
+      function triggerLogout() {
+        const confirmMsg = state.language === 'en' ? 'Are you sure you want to log out?' : 'तुम्हाला नक्की लॉगआउट करायचे आहे का?';
+        if (confirm(confirmMsg)) {
+          state.currentUser = null;
+          persistAppState();
+          
+          document.getElementById('username-input').value = '';
+          document.getElementById('login-container').classList.remove('hidden');
+          document.getElementById('app-container').classList.add('hidden');
+        }
+      }
+
+      // 8. Terminal Price step helpers
+      function fillCapitalValue(val) {
+        document.getElementById('inp-capital').value = val;
+        runTerminalCalculation();
+      }
+
+      function adjustPriceValue(inputId, offset) {
+        const input = document.getElementById(inputId);
+        const curValue = parseFloat(input.value) || 0;
+        input.value = Math.max(0, curValue + offset);
+        if (inputId.includes('risk') || inputId.includes('profit') || inputId.includes('capital') || inputId.includes('entry')) {
+          runTerminalCalculation();
+        }
+      }
+
+      function updateLeverageValue(val) {
+        const slider = document.getElementById('inp-leverage');
+        slider.value = val;
+        document.getElementById('leverage-val-indicator').innerText = val + 'x';
+        runTerminalCalculation();
+      }
+
+      function applyRiskMultiple(multiplier) {
+        const riskGoal = parseFloat(document.getElementById('inp-risk').value) || 0;
+        document.getElementById('inp-profit').value = Math.round(riskGoal * multiplier);
+        runTerminalCalculation();
+      }
+
+      function setTerminalSide(side) {
+        state.terminalSide = side;
+        const buyBtn = document.getElementById('side-buy-btn');
+        const sellBtn = document.getElementById('side-sell-btn');
+        const badge = document.getElementById('side-tag');
+
+        if (side === 'BUY') {
+          buyBtn.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-white bg-emerald-500 shadow-sm";
+          sellBtn.className = "flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
+          badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 uppercase tracking-widest";
+          badge.innerText = state.language === 'en' ? 'BUY (LONG)' : 'खरेदी (LONG)';
+        } else {
+          sellBtn.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-white bg-rose-500 shadow-sm";
+          buyBtn.className = "flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
+          badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-500 border border-rose-500/20 uppercase tracking-widest";
+          badge.innerText = state.language === 'en' ? 'SELL (SHORT)' : 'विक्री (SHORT)';
+        }
+        runTerminalCalculation();
+      }
+
+      // 9. CORE CALCULATION MATH - Terminal Calculator
+      function runTerminalCalculation() {
+        const capitalInput = parseFloat(document.getElementById('inp-capital').value) || 0;
+        const entryPriceInput = parseFloat(document.getElementById('inp-entry').value) || 0;
+        const leverageInput = parseFloat(document.getElementById('inp-leverage').value) || 1;
+        const riskGoalInput = parseFloat(document.getElementById('inp-risk').value) || 0;
+        const profitGoalInput = parseFloat(document.getElementById('inp-profit').value) || 0;
+
+        // Dynamic multi labels on the buttons
+        document.getElementById('mult-1-5-lbl').innerText = Math.round(riskGoalInput * 1.5);
+        document.getElementById('mult-2-lbl').innerText = Math.round(riskGoalInput * 2);
+        document.getElementById('mult-3-lbl').innerText = Math.round(riskGoalInput * 3);
+
+        const outQty = document.getElementById('out-qty');
+        const outTarget = document.getElementById('out-target');
+        const outSL = document.getElementById('out-sl');
+        const outMargin = document.getElementById('out-margin');
+        const outPosition = document.getElementById('out-position');
+        const outRR = document.getElementById('out-rr');
+
+        // Validation bounds check
+        if (capitalInput <= 0 || entryPriceInput <= 0) {
+          outQty.innerText = '0';
+          outTarget.innerText = '₹0.00';
+          outSL.innerText = '₹0.00';
+          outMargin.innerText = '₹0.00';
+          outPosition.innerText = '₹0.00';
+          outRR.innerText = '0.00';
+          return;
+        }
+
+        // Qty = Floor((Capital × Leverage) ÷ Entry Price)
+        const qty = Math.floor((capitalInput * leverageInput) / entryPriceInput);
+
+        if (qty <= 0) {
+          outQty.innerText = '0 (Low Margin)';
+          outTarget.innerText = '₹0.00';
+          outSL.innerText = '₹0.00';
+          outMargin.innerText = '₹0.00';
+          outPosition.innerText = '₹0.00';
+          outRR.innerText = '0.00';
+          return;
+        }
+
+        // Target Price and SL calculations
+        let targetPrice = 0;
+        let slPrice = 0;
+
+        if (state.terminalSide === 'BUY') {
+          // BUY Scenario
+          targetPrice = entryPriceInput + (profitGoalInput / qty);
+          slPrice = entryPriceInput - (riskGoalInput / qty);
+        } else {
+          // SELL Scenario
+          targetPrice = entryPriceInput - (profitGoalInput / qty);
+          slPrice = entryPriceInput + (riskGoalInput / qty);
+        }
+
+        // Margin Used = Quantity * Entry Price / Leverage
+        const actualMarginUsed = (qty * entryPriceInput) / leverageInput;
+        const totalPositionValue = qty * entryPriceInput;
+        
+        // Risk reward ratio = Risk Goal to Profit Goal = 1 : ProfitGoal / RiskGoal
+        const rrRatioValue = riskGoalInput > 0 ? (profitGoalInput / riskGoalInput).toFixed(2) : '0.00';
+
+        // Render Outputs with precise formatting
+        outQty.innerText = qty.toLocaleString();
+        outTarget.innerText = '₹' + targetPrice.toFixed(2);
+        outSL.innerText = '₹' + slPrice.toFixed(2);
+        outMargin.innerText = '₹' + Math.round(actualMarginUsed).toLocaleString();
+        outPosition.innerText = '₹' + Math.round(totalPositionValue).toLocaleString();
+        outRR.innerText = `1 : ${rrRatioValue}`;
+
+        // Update Visualizer maps elements
+        document.getElementById('vis-entry-price-label').innerText = `${state.language === 'en' ? 'Entry' : 'प्रवेश'}: ₹${entryPriceInput.toFixed(2)}`;
+        document.getElementById('vis-target-price-label').innerText = `${state.language === 'en' ? 'Target' : 'लक्ष्य'}: ₹${targetPrice.toFixed(2)}`;
+        document.getElementById('vis-sl-price-label').innerText = `SL: ₹${slPrice.toFixed(2)}`;
+
+        // Red vs Green filling width mapping
+        const visualLossBar = document.getElementById('vis-bar-loss');
+        const visualProfitBar = document.getElementById('vis-bar-profit');
+        if (visualLossBar && visualProfitBar) {
+          // Proportion based on risk to reward amount ratio
+          const totalGoal = riskGoalInput + profitGoalInput;
+          if (totalGoal > 0) {
+            const lossPct = (riskGoalInput / totalGoal) * 100;
+            const profitPct = (profitGoalInput / totalGoal) * 100;
+            visualLossBar.style.width = `${lossPct}%`;
+            visualProfitBar.style.width = `${profitPct}%`;
+          } else {
+            visualLossBar.style.width = '50%';
+            visualProfitBar.style.width = '50%';
+          }
+        }
+      }
+
+      // Terminal setup list persistence
+      function saveTerminalSetup() {
+        const customNameElement = document.getElementById('inp-save-calc-name');
+        let customName = customNameElement.value.trim();
+        if (!customName) {
+          const lang = state.language;
+          customName = lang === 'en' ? `Terminal Setup #${savedListCalculations.length + 1}` : `टर्मिनल सेटअप #${savedListCalculations.length + 1}`;
+        }
+
+        const capital = parseFloat(document.getElementById('inp-capital').value) || 0;
+        const entry = parseFloat(document.getElementById('inp-entry').value) || 0;
+        const leverage = parseFloat(document.getElementById('inp-leverage').value) || 1;
+        const risk = parseFloat(document.getElementById('inp-risk').value) || 0;
+        const profit = parseFloat(document.getElementById('inp-profit').value) || 0;
+        
+        if (capital <= 0 || entry <= 0) {
+          triggerToast(state.language === 'en' ? 'Inputs values must be greater than zero' : 'किंमत शून्यपेक्षा जास्त असणे आवश्यक आहे', 'error');
+          return;
+        }
+
+        const qty = Math.floor((capital * leverage) / entry);
+        if (qty <= 0) {
+          triggerToast(state.language === 'en' ? 'Margin size too low to buy a single share' : 'प्रमाण खूप कमी आहे!', 'error');
+          return;
+        }
+
+        let target = 0;
+        let sl = 0;
+        if (state.terminalSide === 'BUY') {
+          target = entry + (profit / qty);
+          sl = entry - (risk / qty);
+        } else {
+          target = entry - (profit / qty);
+          sl = entry + (risk / qty);
+        }
+
+        const newCalcSetup = {
+          id: Date.now().toString(),
+          name: customName,
+          side: state.terminalSide,
+          capital: capital,
+          entry: entry,
+          leverage: leverage,
+          risk: risk,
+          profit: profit,
+          qty: qty,
+          target: target,
+          sl: sl,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        savedListCalculations.unshift(newCalcSetup);
+        localStorage.setItem('pro_stock_ai_calcs_list_v1', JSON.stringify(savedListCalculations));
+        
+        customNameElement.value = '';
+        renderCalculationsList();
+        
+        triggerToast(state.language === 'en' ? 'Setup successfully saved to station panel!' : 'माहिती पॅनेलमध्ये जतन झाली आहे!', 'success');
+      }
+
+      function deleteTerminalSetupCard(id) {
+        savedListCalculations = savedListCalculations.filter(x => x.id !== id);
+        localStorage.setItem('pro_stock_ai_calcs_list_v1', JSON.stringify(savedListCalculations));
+        renderCalculationsList();
+        triggerToast(state.language === 'en' ? 'Setup deleted successfully' : 'सेटअप यशस्वीरित्या हटविला गेला', 'success');
+      }
+
+      function renderCalculationsList() {
+        const grid = document.getElementById('saved-list-grid');
+        const emptyPlaceholder = document.getElementById('saved-list-empty-placeholder');
+        grid.innerHTML = '';
+
+        if (savedListCalculations.length === 0) {
+          emptyPlaceholder.classList.remove('hidden');
+          return;
+        } else {
+          emptyPlaceholder.classList.add('hidden');
+        }
+
+        savedListCalculations.forEach(calc => {
+          const sideColor = calc.side === 'BUY' ? 'text-emerald-500 bg-emerald-500/10' : 'text-rose-500 bg-rose-500/10';
+          const sideText = calc.side === 'BUY' ? (state.language === 'en' ? 'BUY' : 'खरेदी') : (state.language === 'en' ? 'SELL' : 'विक्री');
+          
+          const cardHtml = `
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-between border border-slate-350 dark:border-white/5 space-y-4 hover:shadow-lg transition-transform hover:scale-[1.01]">
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate max-w-[150px]">${calc.name}</h4>
+                  <span class="text-[9px] text-slate-400 font-mono block">${calc.timestamp}</span>
+                </div>
+                <div class="flex gap-1 items-center">
+                  <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold uppercase ${sideColor}">${sideText}</span>
+                  <button onclick="applySetupToCalculator('${calc.id}')" class="text-xs text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-white p-1 rounded transition-colors" title="Load Setup"><i data-lucide="folder-up" class="w-4 h-4"></i></button>
+                  <button onclick="deleteTerminalSetupCard('${calc.id}')" class="text-xs text-rose-500 hover:bg-rose-500/10 p-1 rounded transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              </div>
+
+              <!-- Setup values matrix -->
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Capital' : 'भांडवल'}:</span>
+                  <span class="font-bold">₹${calc.capital.toLocaleString()} <span class="text-[10px] text-slate-500 lowercase">(${calc.leverage}x)</span></span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Entry Price' : 'प्रवेश'}:</span>
+                  <span class="font-bold">₹${calc.entry}</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Order Qty' : 'प्रमाण'}:</span>
+                  <span class="font-bold text-[var(--color-accent)]">${calc.qty}</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Target (₹)' : 'लक्ष्य'}:</span>
+                  <span class="font-bold text-emerald-500">₹${calc.target.toFixed(2)}</span>
+                </div>
+                <div class="col-span-2 border-t border-slate-350 dark:border-white/5 pt-2 flex justify-between">
+                  <div>
+                    <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Stop Loss' : 'स्टॉप लॉस'}:</span>
+                    <span class="font-bold text-rose-500">₹${calc.sl.toFixed(2)}</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Profit/Loss goals' : 'नफा/जोखीम'}:</span>
+                    <span class="font-semibold text-slate-400">₹${calc.profit}/₹${calc.risk}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          grid.innerHTML += cardHtml;
+        });
+        
+        lucide.createIcons();
+      }
+
+      function applySetupToCalculator(id) {
+        const setup = savedListCalculations.find(x => x.id === id);
+        if (!setup) return;
+
+        document.getElementById('inp-capital').value = setup.capital;
+        document.getElementById('inp-entry').value = setup.entry;
+        document.getElementById('inp-risk').value = setup.risk;
+        document.getElementById('inp-profit').value = setup.profit;
+        
+        setTerminalSide(setup.side);
+        updateLeverageValue(setup.leverage); // runs terminal calculation
+
+        triggerToast(state.language === 'en' ? 'Setup loaded back to calculator' : 'कॅल्क्युलेटर मध्ये सेटअप लोड झाला!', 'success');
+      }
+
+
+      // 10. CORE PL SIMULATOR ENGINE
+      function setPLSimulatorSide(side) {
+        state.plSide = side;
+        const pLBuyBtn = document.getElementById('pl-side-buy-btn');
+        const pLSellBtn = document.getElementById('pl-side-sell-btn');
+        const tag = document.getElementById('pl-side-tag');
+
+        if (side === 'BUY') {
+          pLBuyBtn.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-white bg-emerald-500 shadow-sm";
+          pLSellBtn.className = "flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
+          tag.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 uppercase tracking-widest";
+          tag.innerText = state.language === 'en' ? 'BUY (LONG)' : 'खरेदी (LONG)';
+        } else {
+          pLSellBtn.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-white bg-rose-500 shadow-sm";
+          pLBuyBtn.className = "flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
+          tag.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-500 border border-rose-500/20 uppercase tracking-widest";
+          tag.innerText = state.language === 'en' ? 'SELL (SHORT)' : 'विक्री (SHORT)';
+        }
+        runPLCalculation();
+      }
+
+      function runPLCalculation() {
+        const entryPrice = parseFloat(document.getElementById('inp-pl-entry').value) || 0;
+        const qtyValue = parseFloat(document.getElementById('inp-pl-qty').value) || 0;
+        const exitPrice = parseFloat(document.getElementById('inp-pl-exit').value) || 0;
+        const slPrice = parseFloat(document.getElementById('inp-pl-sl').value) || 0;
+
+        const warningMsg = document.getElementById('pl-calculation-status-msg');
+        
+        const outProfitVal = document.getElementById('pl-out-profit-val');
+        const outProfitPct = document.getElementById('pl-out-profit-pct');
+        const outLossVal = document.getElementById('pl-out-loss-val');
+        const outLossPct = document.getElementById('pl-out-loss-pct');
+        const outTotalExitVal = document.getElementById('pl-out-total-val');
+
+        // Validation rule: Do not calculate anything until *both* Exit Price and SL Price are entered/valid.
+        if (entryPrice <= 0 || qtyValue <= 0 || exitPrice <= 0 || slPrice <= 0) {
+          warningMsg.classList.remove('hidden');
+          outProfitVal.innerText = '₹0.00';
+          outProfitPct.innerText = '0.00%';
+          outLossVal.innerText = '₹0.00';
+          outLossPct.innerText = '0.00%';
+          outTotalExitVal.innerText = '₹0.00';
+          return;
+        } else {
+          warningMsg.classList.add('hidden');
+        }
+
+        let profitAmount = 0;
+        let lossAmount = 0;
+
+        // BUY & SELL correct calculation logic inside Simulator Screen
+        if (state.plSide === 'BUY') {
+          // Profit = (Exit Price − Entry Price) × Qty.
+          // Loss = (Entry Price − SL Price) × Qty.
+          profitAmount = (exitPrice - entryPrice) * qtyValue;
+          lossAmount = (entryPrice - slPrice) * qtyValue;
+        } else {
+          // SELL Scenario:
+          // Profit = (Entry Price − Exit Price) × Qty.
+          // Loss = (SL Price − Entry Price) × Qty.
+          profitAmount = (entryPrice - exitPrice) * qtyValue;
+          lossAmount = (slPrice - entryPrice) * qtyValue;
+        }
+
+        // Relative un-leveraged percent ratio of entering trade value
+        const initialDirectTradeSize = entryPrice * qtyValue;
+        const profitPercentage = initialDirectTradeSize > 0 ? (profitAmount / initialDirectTradeSize) * 100 : 0;
+        const lossPercentage = initialDirectTradeSize > 0 ? (lossAmount / initialDirectTradeSize) * 100 : 0;
+
+        // Exit Total Position Size Value:
+        // For BUY: exitPrice * qtyValue
+        // For SELL: entryPrice * qtyValue + profitAmount = (2 * entryPrice - exitPrice) * qtyValue
+        const realizedExitValue = state.plSide === 'BUY'
+          ? (exitPrice * qtyValue)
+          : ((2 * entryPrice - exitPrice) * qtyValue);
+
+        // Render Simulator outcome Dashboard
+        // P&L color feedback (positive vs negative text colors)
+        if (profitAmount >= 0) {
+          outProfitVal.innerText = '+₹' + profitAmount.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          outProfitPct.innerText = '+' + profitPercentage.toFixed(2) + '%';
+          outProfitVal.className = "text-2xl font-mono font-bold text-emerald-500 mt-2";
+          outProfitPct.className = "text-xs font-mono font-semibold text-emerald-600 dark:text-emerald-400 block mt-1";
+        } else {
+          outProfitVal.innerText = '-₹' + Math.abs(profitAmount).toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          outProfitPct.innerText = profitPercentage.toFixed(2) + '%';
+          outProfitVal.className = "text-2xl font-mono font-bold text-rose-500 mt-2";
+          outProfitPct.className = "text-xs font-mono font-semibold text-rose-600 dark:text-rose-400 block mt-1";
+        }
+
+        if (lossAmount >= 0) {
+          // positive lossAmount represents a standard loss outcome, so we prefix with '-'
+          outLossVal.innerText = '-₹' + lossAmount.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          outLossPct.innerText = '-' + lossPercentage.toFixed(2) + '%';
+          outLossVal.className = "text-2xl font-mono font-bold text-rose-500 mt-2";
+          outLossPct.className = "text-xs font-mono font-semibold text-rose-600 dark:text-rose-400 block mt-1";
+        } else {
+          // negative lossAmount represents a profitable SL lock-in, so we prefix with '+'
+          outLossVal.innerText = '+₹' + Math.abs(lossAmount).toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          outLossPct.innerText = '+' + Math.abs(lossPercentage).toFixed(2) + '%';
+          outLossVal.className = "text-2xl font-mono font-bold text-emerald-500 mt-2";
+          outLossPct.className = "text-xs font-mono font-semibold text-emerald-600 dark:text-emerald-400 block mt-1";
+        }
+
+        outTotalExitVal.innerText = '₹' + Math.round(realizedExitValue).toLocaleString();
+      }
+
+      function savePLSimulatorRecord() {
+        const customNameField = document.getElementById('inp-save-pl-name');
+        let recordName = customNameField.value.trim();
+        if (!recordName) {
+          recordName = state.language === 'en' ? `Simulation Setup #${savedListPLSimulator.length + 1}` : `सिम्युलेशन ट्रेड #${savedListPLSimulator.length + 1}`;
+        }
+
+        const entry = parseFloat(document.getElementById('inp-pl-entry').value) || 0;
+        const qty = parseFloat(document.getElementById('inp-pl-qty').value) || 0;
+        const exit = parseFloat(document.getElementById('inp-pl-exit').value) || 0;
+        const sl = parseFloat(document.getElementById('inp-pl-sl').value) || 0;
+
+        if (entry <= 0 || qty <= 0 || exit <= 0 || sl <= 0) {
+          triggerToast(state.language === 'en' ? 'Cannot save incomplete simulator models' : 'अपूर्ण माहिती जतन करता येणार नाही!', 'error');
+          return;
+        }
+
+        let profit = 0;
+        let loss = 0;
+        if (state.plSide === 'BUY') {
+          profit = (exit - entry) * qty;
+          loss = (entry - sl) * qty;
+        } else {
+          profit = (entry - exit) * qty;
+          loss = (sl - entry) * qty;
+        }
+
+        const exitValue = state.plSide === 'BUY' ? (exit * qty) : ((2 * entry - exit) * qty);
+
+        const newPLSimSetup = {
+          id: Date.now().toString(),
+          name: recordName,
+          side: state.plSide,
+          entry: entry,
+          qty: qty,
+          exit: exit,
+          sl: sl,
+          profit: profit,
+          loss: loss,
+          exitValue: exitValue,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        savedListPLSimulator.unshift(newPLSimSetup);
+        localStorage.setItem('pro_stock_ai_pls_list_v1', JSON.stringify(savedListPLSimulator));
+        
+        customNameField.value = '';
+        renderPLSimulatorList();
+        
+        triggerToast(state.language === 'en' ? 'Simulator record successfully saved!' : 'सिम्युलेटरमध्ये माहिती यशस्वीरित्या सेव्ह झाली!', 'success');
+      }
+
+      function deletePLRecordCard(id) {
+        savedListPLSimulator = savedListPLSimulator.filter(x => x.id !== id);
+        localStorage.setItem('pro_stock_ai_pls_list_v1', JSON.stringify(savedListPLSimulator));
+        renderPLSimulatorList();
+        triggerToast(state.language === 'en' ? 'Simulator record deleted successfully' : 'सिम्युलेशन सेटअप यशस्वीरित्या हटविला गेला', 'success');
+      }
+
+      function renderPLSimulatorList() {
+        const grid = document.getElementById('saved-pnl-grid');
+        const emptyPlaceholder = document.getElementById('saved-pnl-empty-placeholder');
+        grid.innerHTML = '';
+
+        if (savedListPLSimulator.length === 0) {
+          emptyPlaceholder.classList.remove('hidden');
+          return;
+        } else {
+          emptyPlaceholder.classList.add('hidden');
+        }
+
+        savedListPLSimulator.forEach(item => {
+          const entryVal = item.entry * item.qty;
+          const profitPctNum = entryVal > 0 ? (item.profit / entryVal * 100) : 0;
+          const lossPctNum = entryVal > 0 ? (item.loss / entryVal * 100) : 0;
+
+          const displayProfitStr = item.profit >= 0 
+            ? `+₹${Math.round(item.profit).toLocaleString()} (+${profitPctNum.toFixed(2)}%)`
+            : `-₹${Math.round(Math.abs(item.profit)).toLocaleString()} (${profitPctNum.toFixed(2)}%)`;
+          
+          const displayLossStr = item.loss >= 0
+            ? `-₹${Math.round(item.loss).toLocaleString()} (-${lossPctNum.toFixed(2)}%)`
+            : `+₹${Math.round(Math.abs(item.loss)).toLocaleString()} (+${Math.abs(lossPctNum).toFixed(2)}%)`;
+
+          const pnlValueColor = item.profit >= 0 ? 'text-emerald-500' : 'text-rose-500';
+          const lossValueColor = item.loss >= 0 ? 'text-rose-500' : 'text-emerald-500';
+
+          const itemSideColor = item.side === 'BUY' ? 'text-emerald-500 bg-emerald-500/10' : 'text-rose-500 bg-rose-500/10';
+          const buySellText = item.side === 'BUY' ? (state.language === 'en' ? 'BUY' : 'खरेदी') : (state.language === 'en' ? 'SELL' : 'विक्री');
+
+          const cardHtml = `
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-between border border-slate-350 dark:border-white/5 space-y-4 hover:shadow-lg transition-transform hover:scale-[1.01]">
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate max-w-[150px]">${item.name}</h4>
+                  <span class="text-[9px] text-slate-400 font-mono block">${item.timestamp}</span>
+                </div>
+                <div class="flex gap-1 items-center">
+                  <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold uppercase ${itemSideColor}">${buySellText}</span>
+                  <button onclick="applySetupToPLSimulator('${item.id}')" class="text-xs text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-white p-1 rounded transition-colors" title="Load Setup"><i data-lucide="folder-up" class="w-4 h-4"></i></button>
+                  <button onclick="deletePLRecordCard('${item.id}')" class="text-xs text-rose-500 hover:bg-rose-500/10 p-1 rounded transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Entry (₹)' : 'प्रवेश'}</span>
+                  <span class="font-bold">₹${item.entry}</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Qty' : 'प्रमाण'}</span>
+                  <span class="font-bold text-[var(--color-accent)]">${item.qty}</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Exit (Target)' : 'बाहेर पडण्याची किंमत'}</span>
+                  <span class="font-bold text-emerald-500">₹${item.exit}</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Stop Loss' : 'स्टॉप लॉस'}</span>
+                  <span class="font-bold text-rose-500">₹${item.sl}</span>
+                </div>
+                
+                <div class="col-span-2 border-t border-slate-350 dark:border-white/5 pt-2 flex justify-between gap-1">
+                  <div>
+                    <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Target Profit' : 'टारगेट नफा'}</span>
+                    <span class="font-bold ${pnlValueColor}">${displayProfitStr}</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[9px] text-slate-400 block">${state.language==='en' ? 'Risk SL Loss' : 'जोखीम तोटा'}</span>
+                    <span class="font-bold ${lossValueColor}">${displayLossStr}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          grid.innerHTML += cardHtml;
+        });
+
+        lucide.createIcons();
+      }
+
+      function applySetupToPLSimulator(id) {
+        const item = savedListPLSimulator.find(x => x.id === id);
+        if (!item) return;
+
+        document.getElementById('inp-pl-entry').value = item.entry;
+        document.getElementById('inp-pl-qty').value = item.qty;
+        document.getElementById('inp-pl-exit').value = item.exit;
+        document.getElementById('inp-pl-sl').value = item.sl;
+
+        setPLSimulatorSide(item.side); // triggers layout switch and computation update
+
+        triggerToast(state.language === 'en' ? 'Setup loaded back to P&L Simulator' : 'सिम्युलेटर मध्ये सेटअप लोड झाला!', 'success');
+      }
+
+    </script>
+  </body>
+</html>

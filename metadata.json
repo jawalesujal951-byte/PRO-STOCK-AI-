@@ -1,0 +1,6 @@
+{
+  "name": "PRO STOCK AI",
+  "description": "Professional Trading Calculator Web App with advanced terminal calculators, P&L simulator, and dynamic settings with custom local persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
